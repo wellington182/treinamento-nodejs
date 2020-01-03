@@ -1,0 +1,10 @@
+//Instalação nodejs
+apt-get update
+apt-get install nodejs
+apt-get install npm
+
+//Instalação express
+npm install express-generator -g
+
+//Criando app express
+express app --ejs
