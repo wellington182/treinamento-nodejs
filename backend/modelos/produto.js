@@ -7,108 +7,83 @@ function Produto() {
     this.price = 0.0;
 
     this.salvar = function(callback, id) {
-        var description = this.description;
-        var amount = this.amount;
-        var price = this.price;
+      var query = "";
 
-        Produto.todos(function(products) {
-            if (products == []) {
-              console.log("Produto não encontrado");
-            }
-            else {
-              for (var i = 0; i < products.length; i++) {
-                if (products[i].id == id) {
-                  products[i].description = description;
-                  products[i].amount = amount;
-                  products[i].price = price;
-          
-                  Produto.salvarTodos(products);
-                  break;
-                }
-              }
-            }
-        
-            callback.call(null, products)
-          });
+      if (id === undefined) {
+        query = "INSERT INTO loja.products(description, amount, price)" +
+                "VALUES('" + this.description + "', " + this.amount + ", " + this.price + ")";
+      }
+      else {
+        query = "UPDATE loja.products SET description = '" + this.description + "', amount = " + this.amount + ", price = " + this.price + " WHERE id = " + id;
+      }
+      
+      App.db.cnn.exec(query, function(rows, err) {
+        if (err) {
+          console.log("Erro ao executar a query( " + query + " )");
+        }
+  
+        callback.call();
+      });          
     };
 
     this.excluir = function(callback) {
-        var id = this.id;
+      var query = "DELETE FROM loja.products WHERE id = " + this.id;
 
-        Produtos.todos(function(products) {
-            if (products == []) {
-              console.log("Produto não encontrado");        
-            }
-            else {
-              var productsNovos = [];
-
-              for (var i = 0; i < products.length; i++) {
-                if (products[i].id != id) {
-                  productsNovos.push(products[i]);
-                }
-              }
-              
-              products = productsNovos;
-              Produto.salvarTodos(productsNovos);
-            }
-        
-            callback(null, products);        
-        });
+      App.db.cnn.exec(query, function(rows, err) {
+        if (err) {
+          console.log("Erro ao executar a query( " + query + " )");
+        }
+  
+        callback.call();
+      });
     };
 }
 
 Produto.buscar = function(id, callback) {
-    Produto.todos(function(products) {
-        var product = null;
+  var query = "SELECT * FROM loja.products WHERE id = " + id;   
 
-        if (products == []) {
-          console.log("Produto não encontrado");
+  App.db.cnn.exec(query, function(rows, err) {      
+      if (err) {
+        console.log("Erro ao executar a query( " + query + " )");
+        callback.call(null, []);
+      }
+      else {
+        if (rows.length > 0) {
+          callback.call(null, rows[0]);
         }
-        else {    
-            for (var i = 0; i < products.length; i++) {
-              if (products[i].id === id) {
-                product = products[i];
-        
-                break;
-              }
-            }
+        else {
+          callback.call(null, null);
         }
-    
-    
-        callback.call(null, product);
-      });
+      }
+  });      
+};
+
+Produto.buscarPorNome = function(desc, callback) {
+  var query = "SELECT * FROM loja.products WHERE description LIKE '%" + desc + "%'";   
+
+  App.db.cnn.exec(query, function(rows, err) {
+      if (err) {
+        console.log("Erro ao executar a query( " + query + " )");
+        callback.call(null, []);
+      }
+      else {
+        callback.call(null, rows);
+      }
+  });  
 };
 
 Produto.todos = function(callback) {
-    var fs = require('fs');
-    fs.readFile(App.BD, function read(err, data) {    
-      var products = [];
+  var query = "SELECT * FROM loja.products";   
 
+  App.db.cnn.exec(query, function(rows, err) {
       if (err) {
-        console.log(err);
-        
+        console.log("Erro ao executar a query( " + query + " )");
+        callback.call(null, []);
       }
       else {
-        try {
-          products = JSON.parse(data);
-
-        }
-        catch(e) {
-          console.log(e);
-        }
+        callback.call(null, rows);
       }
-      
-      callback.call(null, products);
   });
 };
-
-Produto.salvarTodos = function(products) {
-    var fs = require('fs');
-    fs.writeFile(App.BD, JSON.stringify(products), function(err) {
-      if (err) {
-          console.log(err);
-      }              
-    });
-}
 
 module.exports = Produto;

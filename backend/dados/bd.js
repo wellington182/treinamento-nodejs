@@ -1,1 +1,1 @@
-[{"id":"1","description":"Açúcar","amount":"5","price":"9.98"}]
+[{"id":"1","description":"Feijão","amount":1,"price":"$4,29"},{"id":"3","description":"Feijão branco","amount":1,"price":"$4,49"},{"id":"4","description":"Arroz","amount":5,"price":"$12,98"}]

@@ -15,65 +15,24 @@ router.get('/', function(request, response, next) {
 });
 
 router.get('/pesquisar', function(request, response, next) {
-  dados = { title: 'Pesquisando no Banco'}
-  load(function read(err, data) {    
-    dados['products'] = [];
-
-    if (err) {
-      console.log(err);      
-    }
-    else {
-      var dadosBanco = JSON.parse(data);
-      var desc = request.query.desc;
-      
-      if (desc == "") {
-        dados['products'] = dadosBanco;
-      }
-      else {          
-        var regex = new RegExp(desc, "i");
-
-        for (var i = 0; i < dadosBanco.length; i++) {
-          descBanco = dadosBanco[i].description;
-  
-          if (descBanco.match(regex) !== null) {
-            dados['products'].push(dadosBanco[i]);
-          }
-        }
-      }
-    }
-
-    response.render('index', dados);  
+  Produto.buscarPorNome(request.query.desc, function(products) {    
+    response.render('index', { 
+      title: 'App com Nodejs e Express', products: products 
+    });  
   });
 });
 
 /* POST cadastro */
 router.post('/cadastrar', function(request, response, next) {
-  load(function read(err, data) {
-    products = [];
-
-    if (err) {
-      console.log(err);
-
-      return;
-    }
-
-    try {
-      products = JSON.parse(data);
-    }
-    catch(e) {
-      console.log(e);
-    }
-
-    var hash = {
-      id: request.body.id,
-      description: formatDesc(request.body.desc),
-      amount: formatAmount(request.body.amount),
-      price: formatValue(request.body.price)
-    };
+  var produto = new Produto();
   
-    save(hash);
-    
-    response.render('index', { title: 'Cadastro', products: products });    
+  produto.id =request.body.id;
+  produto.description = request.body.desc;
+  produto.amount = request.body.amount;
+  produto.price = request.body.price;
+
+  produto.salvar(function(products) {
+      response.redirect("/");
   });
 });
 
@@ -106,13 +65,10 @@ router.post('/alterar-product', function(request, response, next) {
 
 router.get('/excluir', function(request, response, next) {
   var produto = new Produto();
-  produto.description = request.query.id;
+  produto.id = request.query.id;
 
-  produto.excluir(function(products) {
-    response.redirect('/', {
-        title: 'App com Nodejs e Express',
-        products: products
-    });
+  produto.excluir(function() {
+    response.redirect('/');
   });
 });
   
