@@ -1,4 +1,4 @@
-var App = require('../config/app');
+var App = require('../../config/app');
 
 function Produto() {
     this.id = 0;
